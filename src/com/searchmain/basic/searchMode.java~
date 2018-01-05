@@ -1,0 +1,104 @@
+package com.searchmain.basic;
+
+import java.io.*;
+import java.util.*;
+
+public class searchMode {
+	HashSet<String> hash = new HashSet<String>();
+	RandomAccessFile fd;
+	Stemmer st = new Stemmer();
+	Scanner input = new Scanner(System.in);
+	Scanner reader1;
+	//XmlEventHandler check = new XmlEventHandler();
+	long start;
+    long end ;
+    long  middle;
+    int j,result;
+    String lineFetched,temp;
+    String searchFor;
+	public searchMode(String indexPath) throws IOException {
+		try{
+			reader1 = new Scanner(new FileInputStream("StopWords"));
+			while (reader1.hasNext()) {
+				String[] s=reader1.next().split(",");
+				for( int i =0;  i < s.length; i++ )
+				{
+					hash.add(s[i]);
+				}
+			}
+		
+			fd = new RandomAccessFile(indexPath+"/"+"d.txt","r");
+			
+		}
+		catch (Exception e){
+			//System.out.println("Except"+e);
+		}
+        long fileLength=fd.length();
+        long i,count = Integer.parseInt(input.nextLine());
+		//while(true)
+        for ( i = 0 ; i < count ; i++)
+		    {
+                searchFor = input.nextLine();
+                searchFor =searchFor.toLowerCase();
+	        if (hash.contains(searchFor)){
+	        	System.out.println();
+	        	continue;
+	        }
+	        st.add( searchFor.toCharArray(),searchFor.length());
+			st.stem();
+			end = fileLength;
+			start=0;
+			fd.seek(0);
+			long startTime = System.currentTimeMillis();
+			startBinarySearch(st.toString());
+			long endTime   = System.currentTimeMillis();
+			long totalTime = endTime - startTime;
+			//System.out.println("Last Search In:"+totalTime+"ms");
+		}
+	
+	}
+	public void startBinarySearch(String searchFor) throws IOException{
+		 	
+		    lineFetched = fd.readLine();
+	        j=0;
+			while( lineFetched.charAt(j) != ',' )
+				j++;
+			temp = lineFetched.substring(0,j);
+			result = temp.compareTo(searchFor);
+			
+	        if ( result == 0 ){
+	        	//System.out.println("Found:"+lineFetched);
+                System.out.println(lineFetched.substring(j+1)+"\n");
+	        	return;
+	        }
+		    
+		    while (start <= end) {
+		      
+		        middle = start + (end - start) / 2;
+		        if (middle > 0 )
+		        	fd.seek(middle-1);
+		        else
+		        	fd.seek(start);
+		        fd.readLine();
+		        lineFetched = fd.readLine();
+		        //System.out.println("LineFetched:"+ lineFetched );
+		        j=0;
+				while( lineFetched.charAt(j) != ',' )
+					j++;
+				temp = lineFetched.substring(0,j);
+				result = temp.compareTo(searchFor);
+				
+		        if ( result == 0 ){
+		        	//System.out.println("Found:"+lineFetched);
+                    System.out.println(lineFetched.substring(j+1)+"\n");
+		        	return;
+		        }
+		        if ( result > 0)
+		            end = middle -1;
+		        else 
+		            start = middle+1;
+		        //fd.seek(start);
+		   }
+		  System.out.println();
+	}
+}

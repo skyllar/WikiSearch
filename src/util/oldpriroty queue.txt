@@ -1,0 +1,92 @@
+package com.search.basic;
+
+import java.io.*;
+import java.util.*;
+
+public class ExternalMergeSort {
+	
+	int totalFiles;
+	int fragments;
+	
+	public ExternalMergeSort (int totalFiles,int fragments){
+		this.totalFiles=totalFiles;
+		this.fragments=fragments;
+	}
+	
+	public void initialiseMerge(String folderPath){
+		int i,j;
+		String[] dataLines = new String[fragments];
+		//Integer[] hash = new Integer[fragments];
+		String min,temp;
+		int result; 
+		int minIndex = 0;
+		Iterator<Integer> itr;
+	    Set<Integer> set = new HashSet<Integer>() ;
+        FileReader[] file = new  FileReader[fragments];
+        File[] del = new  File[fragments];
+	    
+		try{
+			FileWriter fd = new FileWriter( folderPath+"/d.txt");
+			BufferedWriter bd = new BufferedWriter(fd);
+			BufferedReader[] reader = new BufferedReader[totalFiles];
+			for (i = 0 ; i < fragments; i++){
+				set.add(i);
+                file[i]=new FileReader( folderPath +"/d"+Integer.toString(i)+".txt");
+                del[i] = new File(folderPath + "/d"+Integer.toString(i)+".txt");
+				reader[i] = new BufferedReader (file[i]);
+				dataLines[i]=reader[i].readLine();
+			}
+			//find minimum among all of them
+			while ( !set.isEmpty() )
+			{
+				itr = set.iterator();
+				i = itr.next();
+				j=0;
+				while( dataLines[i].charAt(j) != ',' )
+					j++;
+				
+				//System.out.println("below 1while");
+				min = dataLines[i].substring(0,j);
+				minIndex=i;
+				//System.out.println("above while");
+					while (itr.hasNext()) 
+					{
+						i = itr.next();
+						//System.out.println("i inside:"+i);
+						j=0;
+						while( dataLines[i].charAt(j) != ',' )
+							j++;
+						temp = dataLines[i].substring(0,j);
+						result = temp.compareTo(min);
+						if ( result< 0 ){
+							min = temp;
+							minIndex=i;
+						}
+						else if (result == 0){
+							dataLines[minIndex] += dataLines[i].substring(j);
+							dataLines[i]=reader[i].readLine();
+							if ( dataLines[i] == null )
+								itr.remove();
+                                del[i].delete();
+						}
+					}
+					bd.write(dataLines[minIndex]+"\n");
+					//System.out.println("Gonna Write:"+dataLines[minIndex]+"\n");
+					dataLines[minIndex]=reader[minIndex].readLine();
+					if ( dataLines[minIndex] == null )
+                    {
+                        set.remove(minIndex);
+                        del[minIndex].delete();
+                    }
+			} 
+			bd.close();
+			//for(i = 0; i < fragments;i++)
+				//reader[minIndex].close();
+		}		
+		catch (Exception e){
+		//System.out.println("Except"+e);
+		}
+	}
+	//searchMode search = new  searchMode();
+	//search.startSearch();
+}		    

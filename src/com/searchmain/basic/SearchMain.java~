@@ -1,0 +1,14 @@
+package com.searchmain.basic;
+
+import com.search.basic.searchMode;
+
+/**
+ * Created by skyllar on 16/1/14.
+ */
+public class SearchMain {
+	
+	public static void main(String args[]){
+    		searchMode search = new  searchMode();
+		search.searchMode(args[0]);
+	}
+}

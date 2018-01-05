@@ -1,0 +1,178 @@
+package com.search.basic;
+
+import java.io.*;
+import java.lang.reflect.Array;
+import java.util.*;
+
+public class ExternalMergeSort {
+	
+	int totalFiles;
+	int fragments;
+	String[] dataLines;
+	int i,j;
+	String temp;
+	String[] prefix;
+	int result;
+	int check=-1;
+	
+	public ExternalMergeSort (int totalFiles,int fragments){
+		this.totalFiles=totalFiles;
+		this.fragments=fragments;
+	}
+	
+	public class StringLengthComparator implements Comparator<Integer>
+	{
+	    @Override
+	    public int compare(Integer x, Integer y)
+	    {
+	    	result = prefix[x].compareTo(prefix[y]);
+	    	
+	    	/*if ( result == 0)
+	    	{
+	    		dataLines[x] += dataLines[y].substring(j);
+	    		check = x;
+	    		return 1;
+	    	}
+	    	else
+	    	{*/	
+	    	//check = -1;
+	    	if (result < 0)
+	        {
+	            return 1;
+	        }
+	        if (result > 0)
+	        {
+	            return -1;
+	        }
+	        if (result == 0)
+	        {
+	            return 0;
+	        }
+	        return 0;
+	    }
+	}
+	
+	public void initialiseMerge(String folderPath)
+	{
+		dataLines = new String[fragments];
+		prefix = new String [fragments];
+        FileReader[] file = new  FileReader[fragments];
+        File[] del = new  File[fragments];
+        int current;
+        
+        //implementing priority queue
+        Comparator<Integer> comparator = new StringLengthComparator();
+        PriorityQueue<Integer> queue = new PriorityQueue<Integer>(fragments,comparator);
+        
+		try{
+			FileWriter fd = new FileWriter( folderPath+"/d.txt");
+			BufferedWriter bd = new BufferedWriter(fd);
+			BufferedReader[] reader = new BufferedReader[totalFiles];
+			for (i = 0 ; i < fragments; i++){
+                file[i]=new FileReader( folderPath +"/d"+Integer.toString(i)+".txt");
+                del[i] = new File(folderPath + "/d"+Integer.toString(i)+".txt");
+				reader[i] = new BufferedReader (file[i]);
+				dataLines[i]=reader[i].readLine();
+				j=0;
+				while( dataLines[i].charAt(j) != ',' )
+					j++;
+				prefix[i] = dataLines[i].substring(0,j);
+				queue.add(i);
+				
+				//if ( check == -1){
+					//queue.remove(check);
+				/*
+				if (check >= 0)
+				{
+					queue.remove(check);
+					dataLines[check]=reader[check].readLine();
+					if ( dataLines[check] != null)
+					{	
+						j=0;
+						while( dataLines[check].charAt(j) != ',' )
+							j++;
+						prefix[check] = dataLines[check].substring(0,j);
+						queue.add(check);
+					}
+					else
+						del[check].delete();
+					check = -1;
+				}
+				*/
+				
+			}
+			//Array[] temp1 = new Array[fragments];
+			int a[] = new int[fragments];
+			int temp;
+			while (queue.size() != 0)
+			{
+				current = queue.remove();
+				bd.write(dataLines[current]);
+				int k = 0 ;
+				while (queue.size() != 0 && prefix[queue.peek()].equals(prefix[current]))
+				{	
+					temp = queue.remove();
+					j=0;
+					while( dataLines[temp].charAt(j) != ',' )
+						j++;
+					bd.write("%%,"+dataLines[temp].substring(j));
+					
+					if ( (dataLines[temp]=reader[temp].readLine()) != null ){
+						j=0;
+						while( dataLines[temp].charAt(j) != ',' )
+							j++;
+						prefix[temp] = dataLines[temp].substring(0,j);
+						//queue.add(temp);
+						a[k++]=temp;
+					}
+					else
+						del[temp].delete();
+					
+				}	
+				bd.write("\n");
+				
+				for ( i = 0 ; i < k ; i++)
+					queue.add(a[i]);
+				dataLines[current]=reader[current].readLine();
+				
+				if ( dataLines[current] != null )
+				{
+					j=0;
+					while( dataLines[current].charAt(j) != ',' )
+						j++;
+					prefix[current] = dataLines[current].substring(0,j);
+					queue.add(current);
+					
+					/*if (check != -1)
+					{
+						queue.remove(check);
+						dataLines[check]=reader[check].readLine();
+						if ( dataLines[check] != null)
+						{	
+							j=0;
+							while( dataLines[check].charAt(j) != ',' )
+								j++;
+							prefix[check] = dataLines[check].substring(0,j);
+							queue.add(check);
+						}
+						else
+							del[check].delete();
+						check = -1;
+					}*/
+				}
+				else
+					del[current].delete();
+			}
+			
+			bd.close();
+		}		
+		catch (Exception e)
+		{
+			System.out.println("Except:"+e);
+			e.printStackTrace();
+		}
+	}
+	//searchMode search = new  searchMode();
+	//search.startSearch();
+}		    
+
